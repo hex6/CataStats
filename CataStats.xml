@@ -1,0 +1,89 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+  
+  <Frame name ="CStats_Core">
+    <Scripts>
+      <OnLoad>
+        CStats_RegisterEvents(self);
+      </OnLoad>
+    </Scripts>
+  </Frame>
+
+   <Frame name="CharPopoutTemplate" virtual="true">
+    <Size x="256" y="512"/>
+    <Layers>
+      <Layer level="BORDER">
+        <Texture file="Interface\AddOns\CataStats\Textures\PopoutTopLeft">
+          <Anchors>
+            <Anchor point="TOPLEFT"/>
+          </Anchors>
+        </Texture>
+        <Texture file="Interface\AddOns\CataStats\Textures\PopoutBotLeft">
+          <Anchors>
+            <Anchor point="BOTTOMLEFT"/>
+          </Anchors>
+        </Texture>
+        <Texture file="Interface\AddOns\CataStats\Textures\PopoutTopRight">
+          <Anchors>
+            <Anchor point="TOPRIGHT"/>
+          </Anchors>
+        </Texture>
+        <Texture file="Interface\AddOns\CataStats\Textures\PopoutBotRight">
+          <Anchors>
+            <Anchor point="BOTTOMRIGHT"/>
+          </Anchors>
+        </Texture>
+      </Layer>
+    </Layers>
+  </Frame>
+
+  <Frame name="CStats_Frame" parent="PaperDollFrame" hidden="true">
+    <Anchors>
+      <Anchor point="LEFT" relativePoint="LEFT"/>
+    </Anchors>
+    <Size x="340" y="354"/>
+
+    <Scripts>
+      <OnLoad>
+        HelloWorld();
+        CStats_Frame:Show();
+        <!--DebugShowFrameSize(CStats_Frame);-->
+        print("Show the CStats_Frame");
+      </OnLoad>
+    </Scripts>
+    <Frames>
+      <Button name="CStats_PopoutButton">
+        <Size x="32" y="32"/>
+        <Anchors>
+          <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+        </Anchors>
+        <NormalTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Up"/>
+        <PushedTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Down"/>
+        <DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Disabled"/>
+        <HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+        <Scripts>
+          <OnClick function="OnPopoutButton"/>
+        </Scripts>
+      </Button>
+    </Frames>
+  </Frame>
+
+
+
+  <Frame name="CStats_Popout" hidden="true" parent="PaperDollFrame" inherits="CharPopoutTemplate">
+    <Anchors>
+      <Anchor point="RIGHT" relativePoint="RIGHT"/>
+    </Anchors>
+    <Scripts>
+      <OnLoad>
+        HelloWorld();
+        CharacterFrame:Show();
+        DebugShowFrameSize(CharacterFrame);
+        print("Show the CStats_Frame");
+      </OnLoad>
+      <OnShow function="ExpandCharacterFrame"/>
+      <OnHide function="CollapseCharacterFrame"/>
+    </Scripts>
+    <Frames>
+    </Frames>
+  </Frame>
+</Ui>

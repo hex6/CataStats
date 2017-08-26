@@ -1,0 +1,12 @@
+## Interface: 30300
+## Title: CataStats
+## Author: hex6
+## Version: 0.1
+## Notes: A simple addon that implements the Cataclysm character panel.
+
+
+CataStats.lua
+
+CataStats.xml
+
+
