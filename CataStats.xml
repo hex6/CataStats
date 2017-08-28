@@ -36,7 +36,21 @@
     </Layers>
   </Frame>
 
-  <Frame name="CStats_Frame" parent="PaperDollFrame" hidden="true">
+  <Frame name="CStatTemplate" virtual ="true">
+    <Size x="160" y="32"/>
+    <Layers>
+      <Layer level="OVERLAY">
+        <FontString name="$parentStatLabel" inherits="GameFontNormalSmall" justifyH="LEFT" parentKey="StatLabel" text="PlaceHolderStat">
+          <Anchors>
+            <Anchor point="TOPLEFT" x="15" y="-3"/>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+
+  </Frame>
+
+  <Frame name="CStatsOverlay" parent="PaperDollFrame" hidden="true">
     <Anchors>
       <Anchor point="LEFT" relativePoint="LEFT"/>
     </Anchors>
@@ -45,13 +59,13 @@
     <Scripts>
       <OnLoad>
         HelloWorld();
-        CStats_Frame:Show();
+        CStatsOverlay:Show();
         <!--DebugShowFrameSize(CStats_Frame);-->
         print("Show the CStats_Frame");
       </OnLoad>
     </Scripts>
     <Frames>
-      <Button name="CStats_PopoutButton">
+      <Button name="$parentPopoutButton">
         <Size x="32" y="32"/>
         <Anchors>
           <Anchor point="BOTTOMRIGHT" x="0" y="0"/>
@@ -69,21 +83,60 @@
 
 
 
-  <Frame name="CStats_Popout" hidden="true" parent="PaperDollFrame" inherits="CharPopoutTemplate">
+  <Frame name="CStats" hidden="true" parent="PaperDollFrame" inherits="CharPopoutTemplate">
     <Anchors>
       <Anchor point="RIGHT" relativePoint="RIGHT"/>
     </Anchors>
     <Scripts>
       <OnLoad>
         HelloWorld();
-        CharacterFrame:Show();
-        DebugShowFrameSize(CharacterFrame);
+        --CharacterFrame:Show();
+        
+        ExpandCharacterFrame();
         print("Show the CStats_Frame");
       </OnLoad>
       <OnShow function="ExpandCharacterFrame"/>
       <OnHide function="CollapseCharacterFrame"/>
     </Scripts>
     <Frames>
+      <ScrollFrame name="$parentContainer" parent="CStats" inherits="HybridScrollFrameTemplate">
+      <!--<Size x="290" y="330"/>-->
+      <Anchors>
+        <Anchor point="TOPLEFT" relativeTo="CStats" x="40" y="-75"/>
+        <Anchor point="BOTTOMRIGHT" relativeTo="CStats" x="-43" y="81"/>
+        <!--<Anchor point="LEFT" relativeTo="CharacterFrame" relativePoint="RIGHT"/>-->
+      </Anchors>
+      <Frames>
+        <Slider name="$parentScrollBar" hidden="false" inherits="HybridScrollBarTemplate">
+          <Anchors>
+            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+              <Offset>
+                <AbsDimension x="0" y="-12"/>
+              </Offset>
+            </Anchor>
+            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+              <Offset>
+                <AbsDimension x="0" y="11"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </Slider>
+      </Frames>
+      <Scripts>
+        <OnLoad function="CStats_OnLoad"/>
+       <OnShow function="CStats_OnShow"/>
+          <!--
+         <Onload>
+          self:SetFrameLevel(self:GetParent():GetFrameLevel() + 2);
+          CStatsInit();
+        </Onload>
+        <OnShow>
+          DebugShowFrameSize(CStatsContainer);
+        </OnShow>-->
+      </Scripts>
+    </ScrollFrame>
     </Frames>
+
+
   </Frame>
 </Ui>
