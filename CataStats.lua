@@ -3,6 +3,50 @@
 CHARACTER_FRAME_DEFAULT_WIDTH = 384;
 CHARACTER_FRAME_NEW_WIDTH = 564;
 
+CSTAT_CATEGORIES = {
+  ["PLAYERSTAT_BASE_STATS"] = {
+    "STRENGTH",
+    "AGILITY",
+    "STAMINA",
+    "INTELLECT",
+    "SPIRIT"
+  },
+  ["PLAYERSTAT_MELEE_COMBAT"] = {
+    "MELEE_DAMAGE",
+    "MELEE_SPEED",
+    "MELEE_POWER",
+    "MELEE_HIT",
+    "MELEE_CRIT",
+    "MELEE_EXPERTISE"
+  },
+  ["PLAYERSTAT_RANGED_COMBAT"] = {
+    "RANGED_DAMAGE",
+    "RANGED_SPEED",
+    "RANGED_POWER",
+    "RANGED_HIT",
+    "RANGED_CRIT"
+  },
+  ["PLAYERSTAT_SPELL_COMBAT"] = {
+    "SPELL_DAMAGE",
+    "SPELL_HEALING",
+    "SPELL_HIT",
+    "SPELL_CRIT",
+    "SPELL_HASTE",
+    "MANA_REGEN"
+  },
+  ["PLAYERSTAT_DEFENSES"] = {
+    "ARMOR",
+    "DEFENSE",
+    "DODGE",
+    "PARRY",
+    "BLOCK",
+    "RESILIENCE"
+  }
+};
+
+CSTAT_SORTING_ORDER = {"PLAYERSTAT_BASE_STATS","PLAYERSTAT_MELEE_COMBAT",
+                      "PLAYERSTAT_RANGED_COMBAT","PLAYERSTAT_SPELL_COMBAT","PLAYERSTAT_DEFENSES"};
+
 isPopoutExpanded = true;
 
 function HelloWorld() 
@@ -20,66 +64,6 @@ function CStats_RegisterEvents(self)
   --self:RegisterEvent("PLAYER_ENTERING_WORLD");
   print("Registered events");
       
-end
-
---CStatsContainer
---CStatsContainer
-function InitStatWindow()
-  
-  for i=1, getn(PLAYERSTAT_DROPDOWN_OPTIONS) do
-    local name = _G[PLAYERSTAT_DROPDOWN_OPTIONS[i]];
-    local frame = CreateFrame("Frame", "CStats"..name, CStats_ScrollChild, "");
-    local label = frame:CreateFontString("CStatsGroup"..i, 'OVERLAY');
-
-    label:SetFont("Fonts\\ARIALN.ttf", 12)
-    label:SetWidth(236)
-    label:SetHeight(28)
-    label:SetJustifyH("LEFT")
-    label:SetText(_G[PLAYERSTAT_DROPDOWN_OPTIONS[i]]);
-    label:SetPoint("TOPLEFT", frame);
-     if i == 1 then
-        label:SetPoint("TOPLEFT", CStats_ScrollChild) 
-    else
-        label:SetPoint("TOPLEFT", _G["CStatsGroup"..i-1], "BOTTOMLEFT")
-    end
-  --  print(PLAYERSTAT_DROPDOWN_OPTIONS[i]);
-  --  print(_G[PLAYERSTAT_DROPDOWN_OPTIONS[i]]);
-  --  --print(UnitStat("player", i)); -- Attributes
-  --[[
-    print(frame:GetName());
-    frame:SetFrameLevel(frame:GetParent():GetFrameLevel() + 2);
-    frame:Show();
-    frame.StatLabel
-    print(frame.StatLabel:GetText());
-    frame:SetHeight(30);
-    frame:SetWidth(179);
-    DebugShowFrameSize(frame);--]]
-  end
-
-  --[[
-  for i = 1, 30 do
-    local addonText = CStats_ScrollChild:CreateFontString("Childlist"..i, 'OVERLAY')
-    if i == 1 then
-        addonText:SetPoint("TOPLEFT", CStats_ScrollChild) 
-    else
-        addonText:SetPoint("TOPLEFT", _G["Childlist"..i-1], "BOTTOMLEFT")
-    end
-    
-    addonText:SetText("Child #"..i)
-end--]]
-
-  --SetStats(CChild1,1);
-  --SetStats(CChild2,2);
-  --SetStats(CChild3,3);
-  --SetStats(CChild4,4);
-  --SetStats(CChild5,5);
-
---CStats_ScrollChild:SetSize(128,600);
---CStats_ScrollChild.texture = texture;
-
-print("-------");
-print(getn(CStats_ScrollChild:GetChildren()));
-
 end
 
 
@@ -172,8 +156,6 @@ function TokenButton_OnLoad(self)
   self.icon = _G[name.."Icon"];
   self.check = _G[name.."Check"];
   self.expandIcon = _G[name.."ExpandIcon"];
-  self.categoryLeft = _G[name.."CategoryLeft"];
-  self.categoryRight = _G[name.."CategoryRight"];
   self.highlight = _G[name.."Highlight"];
   self.stripe = _G[name.."Stripe"];
 end
@@ -191,6 +173,74 @@ function CStatsInit()
 end
 
 CSTATS_BUTTON_WIDTH = 164
+
+local round = function (num) return math.floor(num + .5); end
+
+function GetTotalButtonHeight(buttons)
+  local totalHeight = 0;
+  for i =1, #buttons do
+    totalHeight = totalHeight + buttons[i]:GetHeight();
+  end
+
+  return totalHeight;
+end
+
+function CreateCStatCategory(self, buttonTemplate, initialOffsetX, initialOffsetY, initialPoint, initialRelative, offsetX, offsetY, point, relativePoint)
+  local scrollChild = self.scrollChild;
+  local button, buttonHeight, buttons, numButtons;
+  
+  local labelHeight = 15;
+  local buttonName = self:GetName() .. "Button";
+  
+  initialPoint = initialPoint or "TOPLEFT";
+  initialRelative = initialRelative or "TOPLEFT";
+  point = point or "TOPLEFT";
+  relativePoint = relativePoint or "BOTTOMLEFT";
+  offsetX = offsetX or 0;
+  offsetY = offsetY or 0;
+  
+  if ( self.buttons ) then
+    buttons = self.buttons;
+    buttonHeight = GetTotalButtonHeight(buttons);
+  else
+
+    button = CreateFrame("BUTTON", buttonName .. 1, scrollChild, buttonTemplate);
+
+    local firstButtonHeight = #CSTAT_CATEGORIES[PLAYERSTAT_DROPDOWN_OPTIONS[1]]*labelHeight;
+    button:SetHeight(firstButtonHeight);
+    buttonHeight = firstButtonHeight;
+
+    button:SetPoint(initialPoint, scrollChild, initialRelative, initialOffsetX, initialOffsetY);
+    buttons = {}
+    tinsert(buttons, button);
+  end
+  
+  self.buttonHeight = round(buttonHeight);
+  
+  local numButtons = #PLAYERSTAT_DROPDOWN_OPTIONS;
+  
+  for i = #buttons + 1, numButtons do
+    print("Button number "..i)
+    button = CreateFrame("BUTTON", buttonName .. i, scrollChild, buttonTemplate);
+    local currentButtonHeight = #CSTAT_CATEGORIES[PLAYERSTAT_DROPDOWN_OPTIONS[i]]*labelHeight;
+    button:SetHeight(currentButtonHeight);
+    buttonHeight = buttonHeight + currentButtonHeight;
+    button:SetPoint(point, buttons[i-1], relativePoint, offsetX, offsetY);
+    tinsert(buttons, button);
+  end
+  
+  scrollChild:SetWidth(self:GetWidth())
+  scrollChild:SetHeight(buttonHeight);
+  self:SetVerticalScroll(0);
+  self:UpdateScrollChildRect();
+  
+  self.buttons = buttons;
+  local scrollBar = self.scrollBar; 
+  scrollBar:SetMinMaxValues(0, buttonHeight);
+  scrollBar:SetValueStep(.005);
+  scrollBar:SetValue(0);
+end
+
 
 function CStats_OnLoad()
   CharacterFrame:Show();
@@ -215,7 +265,7 @@ function CStats_OnLoad()
   CStatsContainer.update = CStats_Update;
   --HybridScrollFrame_CreateButtons (self, buttonTemplate, initialOffsetX, initialOffsetY, 
                                   --initialPoint, initialRelative, offsetX, offsetY, point, relativePoint)
-  HybridScrollFrame_CreateButtons(CStatsContainer, "TokenButtonTemplate", 7, -3, 
+  CreateCStatCategory(CStatsContainer, "CStatsButtonTemplate", 7, -3, 
                                   "TOPLEFT", "TOPLEFT", 0, -3);
 
   local buttons = CStatsContainer.buttons;
@@ -228,12 +278,12 @@ function CStats_OnLoad()
   --DebugShowFrameSize(CStatsContainer);
 end
 
---name, isHeader, isExpanded, isUnused, isWatched, count, extraCurrencyType, icon, itemID
+--name, isHeader, isExpanded, isUnused, count, extraCurrencyType, itemID
 function GetStatsInfo(index)
   if (index > 5) then
-    return "", false, false, true, false, 0, 0, nil, 0
+    return "asd", false, false, true, 0, 0
   else
-    return _G[PLAYERSTAT_DROPDOWN_OPTIONS[index]], true, false, false, false, 0, 0, "Interface\\PVPFrame\\PVP-ArenaPoints-Icon", 0
+    return _G[PLAYERSTAT_DROPDOWN_OPTIONS[index]], true, false, false, false, 0, 0
   end
 
 end
@@ -246,64 +296,39 @@ function CStatsUpdate()
   local buttons = scrollFrame.buttons;
   local numButtons = #buttons;
   local numTokenTypes = GetCurrencyListSize();
-  local name, isHeader, isExpanded, isUnused, isWatched, count, extraCurrencyType, icon, itemID;
+  local name, isHeader, isExpanded, isUnused, count, extraCurrencyType, itemID;
   local button, index;
   for i=1, numButtons do
     index = offset+i;
-    name, isHeader, isExpanded, isUnused, isWatched, count, extraCurrencyType, icon, itemID = GetStatsInfo(index);
+    name, isHeader, isExpanded, isUnused, count, itemID = GetStatsInfo(index);
 
     button = buttons[i];
-    button.check:Hide();
+
     if ( not name or name == "" ) then
       button:Hide();
     else
 
       --Header
       if ( isHeader ) then
-        button.categoryLeft:Show();
-        button.categoryRight:Show();
         button.expandIcon:Show();
         button.count:SetText("");
-        button.icon:SetTexture("");
         if ( isExpanded ) then
           button.expandIcon:SetTexCoord(0.5625, 1, 0, 0.4375);
         else
           button.expandIcon:SetTexCoord(0, 0.4375, 0, 0.4375);
         end
         button.highlight:SetTexture("Interface\\TokenFrame\\UI-TokenFrame-CategoryButton");
-        --button.highlight:SetPoint("TOPLEFT", button, "TOPLEFT", 3, -2);
-        --button.highlight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -3, 2);
+        button.highlight:SetPoint("TOPLEFT", button, "TOPLEFT", 3, -2);
+        button.highlight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -3, 2);
         button:SetText(name);
         button.name:SetText("");
-        print(name);
         button.itemID = nil;
         button.LinkButton:Hide();
       --Regular stat
       else
-        button.categoryLeft:Hide();
-        button.categoryRight:Hide();
         button.expandIcon:Hide();
         button.count:SetText(count);
-        button.extraCurrencyType = extraCurrencyType;
-        if ( extraCurrencyType == 1 ) then  --Arena points
-          button.icon:SetTexture("Interface\\PVPFrame\\PVP-ArenaPoints-Icon");
-          button.icon:SetTexCoord(0, 1, 0, 1);
-        elseif ( extraCurrencyType == 2 ) then --Honor points
-          local factionGroup = UnitFactionGroup("player");
-          if ( factionGroup ) then
-            button.icon:SetTexture("Interface\\TargetingFrame\\UI-PVP-"..factionGroup);
-            button.icon:SetTexCoord( 0.03125, 0.59375, 0.03125, 0.59375 );
-          else
-            button.icon:Hide() --We don't know their faction yet!
-            button.icon:SetTexCoord(0, 1, 0, 1);
-          end
-        else
-          button.icon:SetTexture(icon);
-          button.icon:SetTexCoord(0, 1, 0, 1);
-        end
-        if ( isWatched ) then
-          button.check:Show();
-        end
+
         button.highlight:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight");
         button.highlight:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0);
         button.highlight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0);
@@ -332,7 +357,6 @@ function CStatsUpdate()
       button.isHeader = isHeader;
       button.isExpanded = isExpanded;
       button.isUnused = isUnused;
-      button.isWatched = isWatched;
       button:Show();
     end
   end
